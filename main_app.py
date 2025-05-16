@@ -1,9 +1,9 @@
 import os
-import numpy as np
-import pandas as pd
-import tkinter as tk
+import numpy
+import pandas
+import tkinter
 from tkinter import ttk, filedialog
-import tensorflow as tf
+import tensorflow
 import tempfile
 import shutil
 from sklearn.model_selection import train_test_split
@@ -39,7 +39,7 @@ class ClassificadorImagensApp:
         # Área de log
         self.log_frame = ttk.LabelFrame(root, text="Log")
         self.log_frame.pack(fill="both", padx=5, pady=5)
-        self.log_text = tk.Text(self.log_frame, height=5)
+        self.log_text = tkinter.Text(self.log_frame, height=5)
         self.log_text.pack(fill="both", expand=True)
         
         # Configurar abas
@@ -47,8 +47,8 @@ class ClassificadorImagensApp:
         self.setup_cnn_tab()
     
     def log_message(self, message):
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
+        self.log_text.insert(tkinter.END, message + "\n")
+        self.log_text.see(tkinter.END)
     
     def setup_rgb_tab(self):
         # Frame para upload e processamento
@@ -61,12 +61,12 @@ class ClassificadorImagensApp:
         
         # Lista de classes
         ttk.Label(data_frame, text="Classes:").grid(row=0, column=1, padx=5)
-        self.class_listbox = tk.Listbox(data_frame, width=40, height=5)
+        self.class_listbox = tkinter.Listbox(data_frame, width=40, height=5)
         self.class_listbox.grid(row=0, column=2, padx=5, pady=5, rowspan=3)
         
         # Frame para intervalos RGB
         rgb_frame = ttk.LabelFrame(data_frame, text="Intervalos RGB")
-        rgb_frame.grid(row=3, column=0, columnspan=4, padx=10, pady=5, sticky=tk.W+tk.E)
+        rgb_frame.grid(row=3, column=0, columnspan=4, padx=10, pady=5, sticky=tkinter.W+tkinter.E)
         
         # Entradas RGB
         ttk.Label(rgb_frame, text="Classe:").grid(row=0, column=0, padx=5)
@@ -94,7 +94,7 @@ class ClassificadorImagensApp:
         
         # Lista de intervalos
         ttk.Label(rgb_frame, text="Intervalos:").grid(row=1, column=0, padx=5, columnspan=2)
-        self.rgb_intervals_listbox = tk.Listbox(rgb_frame, width=60, height=5)
+        self.rgb_intervals_listbox = tkinter.Listbox(rgb_frame, width=60, height=5)
         self.rgb_intervals_listbox.grid(row=1, column=2, padx=5, pady=5, columnspan=9)
         
         # Botão processar
@@ -118,7 +118,7 @@ class ClassificadorImagensApp:
         
         ttk.Label(train_frame, text="Neurônios:").grid(row=0, column=4, padx=5)
         self.neurons_per_layer = ttk.Entry(train_frame, width=10)
-        self.neurons_per_layer.insert(0, "4,4")
+        self.neurons_per_layer.insert(0, "4")
         self.neurons_per_layer.grid(row=0, column=5, padx=5)
         
         ttk.Label(train_frame, text="Épocas:").grid(row=0, column=6, padx=5)
@@ -152,7 +152,7 @@ class ClassificadorImagensApp:
         
         # Lista de classes
         ttk.Label(data_frame, text="Classes:").grid(row=0, column=1, padx=5)
-        self.cnn_class_listbox = tk.Listbox(data_frame, width=40, height=5)
+        self.cnn_class_listbox = tkinter.Listbox(data_frame, width=40, height=5)
         self.cnn_class_listbox.grid(row=0, column=2, padx=5, pady=5, rowspan=3)
         
         ttk.Label(data_frame, text="% teste:").grid(row=3, column=0, padx=5)
@@ -171,7 +171,7 @@ class ClassificadorImagensApp:
         
         ttk.Label(params_frame, text="Neurônios:").grid(row=0, column=2, padx=5)
         self.dense_neurons = ttk.Entry(params_frame, width=10)
-        self.dense_neurons.insert(0, "128,64")
+        self.dense_neurons.insert(0, "64")
         self.dense_neurons.grid(row=0, column=3, padx=5)
         
         ttk.Label(params_frame, text="Épocas:").grid(row=0, column=4, padx=5)
@@ -215,11 +215,11 @@ class ClassificadorImagensApp:
         
         if network_type == "rgb":
             self.class_folders[class_name] = folder_path
-            self.class_listbox.insert(tk.END, f"{class_name}: {folder_path}")
+            self.class_listbox.insert(tkinter.END, f"{class_name}: {folder_path}")
             self.selected_class['values'] = list(self.class_folders.keys())
         else:  # CNN
             self.cnn_class_folders[class_name] = folder_path
-            self.cnn_class_listbox.insert(tk.END, f"{class_name}: {folder_path}")
+            self.cnn_class_listbox.insert(tkinter.END, f"{class_name}: {folder_path}")
     
     def add_rgb_interval(self):
         class_name = self.selected_class.get()
@@ -231,14 +231,14 @@ class ClassificadorImagensApp:
             
             interval = [r, g, b, tolerance, class_name]
             self.rgb_intervals.append(interval)
-            self.rgb_intervals_listbox.insert(tk.END, 
+            self.rgb_intervals_listbox.insert(tkinter.END, 
                 f"{class_name}: R={r}, G={g}, B={b}, T={tolerance}")
             
             # Limpar campos
-            self.r_value.delete(0, tk.END)
-            self.g_value.delete(0, tk.END)
-            self.b_value.delete(0, tk.END)
-            self.tolerance_value.delete(0, tk.END)
+            self.r_value.delete(0, tkinter.END)
+            self.g_value.delete(0, tkinter.END)
+            self.b_value.delete(0, tkinter.END)
+            self.tolerance_value.delete(0, tkinter.END)
         except ValueError:
             self.log_message("Erro: Os valores RGB e tolerância devem ser números inteiros")
     
@@ -255,7 +255,7 @@ class ClassificadorImagensApp:
             neurons_per_layer_str = self.neurons_per_layer.get()
             epochs = int(self.epochs_rgb.get())
             
-            df = pd.read_csv(csv_path)
+            df = pandas.read_csv(csv_path)
             num_classes = len(df.iloc[:, -1].unique())
             
             self.log_message(f"Treinando com {num_classes} classes")
@@ -281,14 +281,14 @@ class ClassificadorImagensApp:
                 classes_path = os.path.join(save_dir, "rgb_class_names.npy")
                 
                 save_model(self.rgb_model, model_path)
-                np.save(intervals_path, self.rgb_intervals)
-                np.save(classes_path, self.rgb_class_names)
+                numpy.save(intervals_path, self.rgb_intervals)
+                numpy.save(classes_path, self.rgb_class_names)
             else:  # CNN
                 model_path = os.path.join(save_dir, "cnn_model.h5")
                 classes_path = os.path.join(save_dir, "cnn_class_names.npy")
                 
                 save_model(self.cnn_model, model_path)
-                np.save(classes_path, self.cnn_class_names)
+                numpy.save(classes_path, self.cnn_class_names)
                 
             self.log_message(f"Modelo {model_type.upper()} salvo em: {model_path}")
         except Exception as e:
@@ -318,12 +318,12 @@ class ClassificadorImagensApp:
             
         try:
             self.rgb_model = load_model(model_path)
-            self.rgb_intervals = np.load(intervals_path, allow_pickle=True).tolist()
-            self.rgb_class_names = np.load(classes_path, allow_pickle=True)
+            self.rgb_intervals = numpy.load(intervals_path, allow_pickle=True).tolist()
+            self.rgb_class_names = numpy.load(classes_path, allow_pickle=True)
             
-            self.rgb_intervals_listbox.delete(0, tk.END)
+            self.rgb_intervals_listbox.delete(0, tkinter.END)
             for r, g, b, t, class_name in self.rgb_intervals:
-                self.rgb_intervals_listbox.insert(tk.END, 
+                self.rgb_intervals_listbox.insert(tkinter.END, 
                     f"{class_name}: R={r}, G={g}, B={b}, T={t}")
             
             self.log_message(f"Modelo RGB carregado com {len(self.rgb_class_names)} classes")
@@ -347,7 +347,7 @@ class ClassificadorImagensApp:
             
         try:
             self.cnn_model = load_model(model_path)
-            self.cnn_class_names = np.load(classes_path, allow_pickle=True)
+            self.cnn_class_names = numpy.load(classes_path, allow_pickle=True)
             self.log_message(f"Modelo CNN carregado com {len(self.cnn_class_names)} classes")
         except Exception as e:
             self.log_message(f"Erro ao carregar modelo: {str(e)}")
@@ -409,7 +409,6 @@ class ClassificadorImagensApp:
             # Limpar diretórios
             shutil.rmtree(temp_dir)
             
-            # Mostrar resultados
             self.display_cnn_results(accuracy)
             
         except Exception as e:
@@ -463,6 +462,6 @@ class ClassificadorImagensApp:
             self.log_message(f"CNN: {class_name} ({probability:.2%})")
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = tkinter.Tk()
     app = ClassificadorImagensApp(root)
     root.mainloop() 

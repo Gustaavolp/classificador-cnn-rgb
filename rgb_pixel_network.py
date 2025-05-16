@@ -1,26 +1,16 @@
 import os
-import numpy as np
-import pandas as pd
-import tensorflow as tf
+import numpy
+import pandas
+import tensorflow
 from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 def extract_rgb_features(image_path, rgb_intervals):
-    """
-    Extrai características de uma imagem baseadas em intervalos de cores RGB
-    
-    Args:
-        image_path (str): Caminho para a imagem
-        rgb_intervals (list): Lista de intervalos RGB, cada um como 
-                            [r_center, g_center, b_center, tolerance, name]
-    
-    Returns:
-        list: Percentuais de pixels em cada intervalo definido
-    """
+
     try:
         img = Image.open(image_path).convert('RGB')
-        pixels = np.array(img)
+        pixels = numpy.array(img)
         total_pixels = pixels.shape[0] * pixels.shape[1]
         features = []
         
@@ -40,7 +30,7 @@ def extract_rgb_features(image_path, rgb_intervals):
             rgb_mask = r_mask & g_mask & b_mask
             
             # Calcular percentual de pixels neste intervalo
-            matching_pixels = np.sum(rgb_mask)
+            matching_pixels = numpy.sum(rgb_mask)
             percentage = (matching_pixels / total_pixels) * 100
             features.append(percentage)
             
@@ -50,17 +40,7 @@ def extract_rgb_features(image_path, rgb_intervals):
         return None
 
 def create_rgb_dataset(class_folders, rgb_intervals, output_csv):
-    """
-    Cria um dataset CSV com características RGB extraídas das imagens
-    
-    Args:
-        class_folders (dict): Dicionário com {classe: pasta}
-        rgb_intervals (list): Lista de intervalos RGB
-        output_csv (str): Caminho para salvar o CSV resultante
-    
-    Returns:
-        str: Caminho do CSV criado
-    """
+
     data = []
     
     for class_name, folder_path in class_folders.items():
@@ -79,32 +59,19 @@ def create_rgb_dataset(class_folders, rgb_intervals, output_csv):
                     data.append(row)
     
     # Criar nomes das colunas
-    feature_names = [f"feature_{i+1}" for i in range(len(rgb_intervals))]
+    feature_names = [str(interval[-1]) for interval in rgb_intervals]
     column_names = feature_names + ["classe"]
-    
+
     # Criar DataFrame e salvar como CSV
-    df = pd.DataFrame(data, columns=column_names)
+    df = pandas.DataFrame(data, columns=column_names)
     df.to_csv(output_csv, index=False)
     
     return output_csv
 
 def train_rgb_network(csv_path, num_hidden_layers, neurons_per_layer_str, epochs, test_split_ratio, num_classes):
-    """
-    Treina a rede neural baseada em características RGB
-    
-    Args:
-        csv_path (str): Caminho para o arquivo CSV com os dados
-        num_hidden_layers (int): Número de camadas ocultas
-        neurons_per_layer_str (str): Neurônios por camada, ex: "4,4"
-        epochs (int): Número de épocas para treinamento
-        test_split_ratio (float): Proporção de dados para teste (0.0-1.0)
-        num_classes (int): Número de classes para classificação
-    
-    Returns:
-        tuple: (modelo treinado, acurácia de teste, histórico de treinamento)
-    """
+
     # Carregamento da base de dados
-    dataset = pd.read_csv(csv_path)
+    dataset = pandas.read_csv(csv_path)
 
     # Separação dos dados em features (X) e target (y)
     num_features = len(dataset.columns) - 1
@@ -122,7 +89,7 @@ def train_rgb_network(csv_path, num_hidden_layers, neurons_per_layer_str, epochs
         loss_function = 'binary_crossentropy'
         output_units = 1
     else:
-        y = tf.keras.utils.to_categorical(y_encoded, num_classes=num_classes)
+        y = tensorflow.keras.utils.to_categorical(y_encoded, num_classes=num_classes)
         output_activation = 'softmax'
         loss_function = 'categorical_crossentropy'
         output_units = num_classes
@@ -132,11 +99,11 @@ def train_rgb_network(csv_path, num_hidden_layers, neurons_per_layer_str, epochs
         X, y, test_size=test_split_ratio, stratify=y if num_classes > 1 else None)
 
     # Construção da rede neural
-    rede_neural = tf.keras.models.Sequential()
+    rede_neural = tensorflow.keras.models.Sequential()
     neurons_list = [int(n) for n in neurons_per_layer_str.split(',')]
     
     # Primeira camada oculta
-    rede_neural.add(tf.keras.layers.Dense(
+    rede_neural.add(tensorflow.keras.layers.Dense(
         units=neurons_list[0], 
         activation='relu', 
         input_shape=(num_features,)
@@ -144,13 +111,13 @@ def train_rgb_network(csv_path, num_hidden_layers, neurons_per_layer_str, epochs
     
     # Camadas ocultas adicionais
     for i in range(1, min(num_hidden_layers, len(neurons_list))):
-        rede_neural.add(tf.keras.layers.Dense(
+        rede_neural.add(tensorflow.keras.layers.Dense(
             units=neurons_list[i], 
             activation='relu'
         ))
             
     # Camada de saída
-    rede_neural.add(tf.keras.layers.Dense(
+    rede_neural.add(tensorflow.keras.layers.Dense(
         units=output_units, 
         activation=output_activation
     ))
@@ -178,24 +145,13 @@ def train_rgb_network(csv_path, num_hidden_layers, neurons_per_layer_str, epochs
     return rede_neural, accuracy, historico, class_names
 
 def classify_image_rgb(model, image_path, rgb_intervals, class_names):
-    """
-    Classifica uma nova imagem com o modelo RGB treinado
-    
-    Args:
-        model: Modelo treinado
-        image_path (str): Caminho para a imagem a classificar
-        rgb_intervals (list): Lista de intervalos RGB usados no treinamento
-        class_names (list): Nomes das classes
-    
-    Returns:
-        tuple: (classe predita, probabilidade)
-    """
+
     features = extract_rgb_features(image_path, rgb_intervals)
     if not features:
         return None, 0
         
     # Converter para array e preparar formato para previsão
-    features_array = np.array([features])
+    features_array = numpy.array([features])
     
     # Fazer previsão
     prediction = model.predict(features_array)[0]
@@ -206,5 +162,5 @@ def classify_image_rgb(model, image_path, rgb_intervals, class_names):
         pred_class = 1 if prob >= 0.5 else 0
         return class_names[pred_class], prob if pred_class == 1 else 1 - prob
     else:  # Modelo multiclasse
-        pred_class = np.argmax(prediction)
+        pred_class = numpy.argmax(prediction)
         return class_names[pred_class], prediction[pred_class] 
