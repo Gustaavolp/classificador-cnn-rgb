@@ -18,17 +18,17 @@ class ClassificadorImagensApp:
         self.root.title("Classificador de Imagens")
         self.root.geometry("900x700")
         
-        # Variáveis de estado
+        # Variáveis
         self.rgb_model = None
         self.rgb_class_names = None
         self.cnn_model = None
         self.cnn_class_names = None
         self.rgb_intervals = []
-        self.class_folders = {}  # Para RGB
-        self.cnn_class_folders = {}  # Para CNN
+        self.class_folders = {}
+        self.cnn_class_folders = {}
         self.current_image_path = None
         
-        # Criar abas
+        # Abas
         self.tab_control = ttk.Notebook(root)
         self.tab_rgb = ttk.Frame(self.tab_control)
         self.tab_cnn = ttk.Frame(self.tab_control)
@@ -36,39 +36,41 @@ class ClassificadorImagensApp:
         self.tab_control.add(self.tab_cnn, text="CNN")
         self.tab_control.pack(expand=1, fill="both")
         
-        # Área de log
+        # Log
         self.log_frame = ttk.LabelFrame(root, text="Log")
         self.log_frame.pack(fill="both", padx=5, pady=5)
         self.log_text = tkinter.Text(self.log_frame, height=5)
         self.log_text.pack(fill="both", expand=True)
         
-        # Configurar abas
         self.setup_rgb_tab()
         self.setup_cnn_tab()
     
-    def log_message(self, message):
-        self.log_text.insert(tkinter.END, message + "\n")
+    def log_message(self, msg):
+        self.log_text.insert(tkinter.END, msg + "\n")
         self.log_text.see(tkinter.END)
     
     def setup_rgb_tab(self):
-        # Frame para upload e processamento
+        # Frame para dados
         data_frame = ttk.LabelFrame(self.tab_rgb, text="Dados")
         data_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
-        # Botão para adicionar pasta
-        ttk.Button(data_frame, text="Adicionar Pasta", 
-                  command=lambda: self.add_class_folder("rgb")).grid(row=0, column=0, padx=5, pady=5)
+        # Botão para pasta
+        ttk.Button(
+            data_frame, 
+            text="Adicionar Pasta", 
+            command=lambda: self.add_class_folder("rgb")
+        ).grid(row=0, column=0, padx=5, pady=5)
         
-        # Lista de classes
+        # Lista classes
         ttk.Label(data_frame, text="Classes:").grid(row=0, column=1, padx=5)
         self.class_listbox = tkinter.Listbox(data_frame, width=40, height=5)
         self.class_listbox.grid(row=0, column=2, padx=5, pady=5, rowspan=3)
         
-        # Frame para intervalos RGB
+        # Frame RGB
         rgb_frame = ttk.LabelFrame(data_frame, text="Intervalos RGB")
         rgb_frame.grid(row=3, column=0, columnspan=4, padx=10, pady=5, sticky=tkinter.W+tkinter.E)
         
-        # Entradas RGB
+        # Entradas
         ttk.Label(rgb_frame, text="Classe:").grid(row=0, column=0, padx=5)
         self.selected_class = ttk.Combobox(rgb_frame, width=15)
         self.selected_class.grid(row=0, column=1, padx=5)
@@ -89,19 +91,25 @@ class ClassificadorImagensApp:
         self.tolerance_value = ttk.Entry(rgb_frame, width=5)
         self.tolerance_value.grid(row=0, column=9, padx=5)
         
-        ttk.Button(rgb_frame, text="Adicionar", 
-                  command=self.add_rgb_interval).grid(row=0, column=10, padx=5)
+        ttk.Button(
+            rgb_frame, 
+            text="Adicionar",
+            command=self.add_rgb_interval
+        ).grid(row=0, column=10, padx=5)
         
-        # Lista de intervalos
+        # Lista intervalos
         ttk.Label(rgb_frame, text="Intervalos:").grid(row=1, column=0, padx=5, columnspan=2)
         self.rgb_intervals_listbox = tkinter.Listbox(rgb_frame, width=60, height=5)
         self.rgb_intervals_listbox.grid(row=1, column=2, padx=5, pady=5, columnspan=9)
         
-        # Botão processar
-        ttk.Button(data_frame, text="Processar e Gerar CSV", 
-                  command=self.process_images_and_generate_csv).grid(row=4, column=0, padx=5, pady=5, columnspan=2)
+        # Botão csv
+        ttk.Button(
+            data_frame, 
+            text="Processar e Gerar CSV",
+            command=self.process_images_and_generate_csv
+        ).grid(row=4, column=0, padx=5, pady=5, columnspan=2)
         
-        # Frame para treinamento
+        # Frame treinamento
         train_frame = ttk.LabelFrame(self.tab_rgb, text="Treinamento")
         train_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
@@ -131,7 +139,7 @@ class ClassificadorImagensApp:
         ttk.Button(train_frame, text="Salvar", command=self.save_rgb_model).grid(row=1, column=2, padx=5, pady=5, columnspan=2)
         ttk.Button(train_frame, text="Carregar", command=self.load_rgb_model).grid(row=1, column=4, padx=5, pady=5, columnspan=2)
         
-        # Frame para classificação
+        # Frame classificação
         classify_frame = ttk.LabelFrame(self.tab_rgb, text="Classificar")
         classify_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
@@ -164,10 +172,10 @@ class ClassificadorImagensApp:
         params_frame = ttk.LabelFrame(self.tab_cnn, text="Parâmetros")
         params_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
-        ttk.Label(params_frame, text="Filtros:").grid(row=0, column=0, padx=5)
-        self.initial_filters = ttk.Entry(params_frame, width=5)
-        self.initial_filters.insert(0, "32")
-        self.initial_filters.grid(row=0, column=1, padx=5)
+        ttk.Label(params_frame, text="Camadas:").grid(row=0, column=0, padx=5)
+        self.num_conv_layers = ttk.Entry(params_frame, width=5)
+        self.num_conv_layers.insert(0, "2")
+        self.num_conv_layers.grid(row=0, column=1, padx=5)
         
         ttk.Label(params_frame, text="Neurônios:").grid(row=0, column=2, padx=5)
         self.dense_neurons = ttk.Entry(params_frame, width=10)
@@ -359,7 +367,7 @@ class ClassificadorImagensApp:
                 return
                 
             num_classes = len(self.cnn_class_folders)
-            initial_filters = int(self.initial_filters.get())
+            num_conv_layers = int(self.num_conv_layers.get())
             dense_neurons_str = self.dense_neurons.get()
             epochs = int(self.epochs_cnn.get())
             test_split = float(self.cnn_test_split.get()) / 100
@@ -403,7 +411,7 @@ class ClassificadorImagensApp:
             # Treinar modelo
             self.cnn_model, accuracy, _, self.cnn_class_names = train_cnn_network(
                 train_dir, test_dir, num_classes, 
-                initial_filters, dense_neurons_str, epochs
+                num_conv_layers, dense_neurons_str, epochs
             )
             
             # Limpar diretórios
